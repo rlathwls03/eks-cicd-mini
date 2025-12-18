@@ -10,8 +10,10 @@ phases:
       - cd backend
       - chmod +x gradlew
       - ./gradlew build
+      - cd ..
 
 artifacts:
-  base-directory: backend/build/libs
   files:
-    - '*.jar'
+    - appspec.yml
+    - deploy-scripts/**/*
+    - backend/build/libs/*.jar
