@@ -1,8 +1,13 @@
 import axios from "axios";
 
+//const instance = axios.create({
+//    baseURL: "http://localhost:8080",
+//});
+
 const instance = axios.create({
-    baseURL: "http://localhost:8080",
+  baseURL: "http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com",
 });
+
 
 instance.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken");

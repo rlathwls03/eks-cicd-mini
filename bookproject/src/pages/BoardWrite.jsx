@@ -18,8 +18,8 @@ export default function BoardWrite(){
 
         console.log("🔑 accessToken:", token);
 
-        axios.get("http://localhost:8080/auth/me", {
-            headers: { Authorization: `Bearer ${token}` },
+        axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
+          headers: { Authorization: `Bearer ${token}` },
         })
             .then(res => {
                 console.log("👤 로그인 유저:", res.data);

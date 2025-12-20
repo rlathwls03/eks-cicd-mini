@@ -32,7 +32,7 @@ export default function BoardDetail() {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
 
-    axios.get("http://localhost:8080/auth/me", {
+    axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => {
@@ -43,53 +43,6 @@ export default function BoardDetail() {
       })
       .catch(() => setLoginUser(null));
   }, []);
-
-  // ============================
-  // 게시글 상세
-  // ============================
-//   useEffect(() => {
-//     const loadPost = async () => {
-//<<<<<<< HEAD
-//       console.log("🔍 fetchBoardDetail 호출");
-//=======
-//>>>>>>> fix/user-update1-frontend
-//       try {
-//         const data = await fetchBoardDetail(id);
-//         setPost(data);
-//       } catch (err) {
-//         console.error("게시글 불러오기 실패:", err);
-//       }
-//     };
-//     loadPost();
-//   }, [id]);
-
-//     const didFetch = useRef(false);
-//
-//     useEffect(() => {
-// <<<<<<< HEAD
-//       if (didFetch.current) return;
-//       didFetch.current = true;
-//
-//       const loadPost = async () => {
-//         try {
-//           const data = await fetchBoardDetail(id);
-//           setPost(data);
-//         } catch (err) {
-//           console.error("게시글 불러오기 실패:", err);
-//         }
-//       };
-//
-// =======
-//       if (didFetch.current) return;  // 이미 한 번 실행됐다면 중단
-//       didFetch.current = true;
-//
-//       const loadPost = async () => {
-//         const data = await fetchBoardDetail(id);
-//         setPost(data);
-//       };
-// >>>>>>> fix/user-update1-frontend
-//       loadPost();
-//     }, [id]);
 
     const didFetch = useRef(false);
     useEffect(() => {
@@ -163,8 +116,13 @@ export default function BoardDetail() {
         const token = localStorage.getItem("accessToken");
         if (!token) return alert("로그인 후 이용 가능합니다.");
 
+//         const res = await axios.post(
+//           `http://localhost:8080/api/boards/${boardId}/like?liked=${liked}`,
+//           {},
+//           { params: { liked }, headers: { Authorization: `Bearer ${token}` } }
+//         );
         const res = await axios.post(
-          `http://localhost:8080/api/boards/${boardId}/like?liked=${liked}`,
+          `http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/api/boards/${boardId}/like?liked=${liked}`,
           {},
           { params: { liked }, headers: { Authorization: `Bearer ${token}` } }
         );

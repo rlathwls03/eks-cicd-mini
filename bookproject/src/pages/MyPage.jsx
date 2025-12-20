@@ -36,7 +36,7 @@ export default function MyPage() {
 
         const fetchMe = async () => {
             try {
-                const res = await fetch("http://localhost:8080/auth/me", {
+                const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -86,7 +86,7 @@ export default function MyPage() {
         }
 
         try {
-            const res = await fetch("http://localhost:8080/auth/me", {
+            const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
