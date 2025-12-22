@@ -7,7 +7,7 @@ import axios from "axios";
 //});
 
 const instance = axios.create({
-  baseURL: "http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com",
+  baseURL: import.meta.env.VITE_API_BASE_URL,
 });
 
 
