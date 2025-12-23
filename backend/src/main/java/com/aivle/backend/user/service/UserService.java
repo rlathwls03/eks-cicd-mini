@@ -8,6 +8,8 @@ import com.aivle.backend.user.dto.UpdateUserRequest;   // ✅ 추가
 import com.aivle.backend.user.dto.UserResponse;
 import com.aivle.backend.user.entity.User;
 import com.aivle.backend.user.repository.UserRepository;
+import com.aivle.backend.exception.CustomException;
+import org.springframework.http.HttpStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -48,10 +50,10 @@ public class UserService {
     public LoginResponse login(LoginRequest req) {
 
         User user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> new CustomException("가입되지 않은 이메일입니다.", HttpStatus.NOT_FOUND));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException("비밀번호가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
         }
 
         // ⚠ 여기서 email, role 두 개 다 넘겨줘야 함

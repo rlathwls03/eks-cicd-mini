@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import { Box, TextField, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import {createBoard} from "../api/boardApi.js";
-import axios from "axios";   // ← 이동을 위한 추가
+import { fetchMyInfo } from "../api/authApi";
 
 export default function BoardWrite(){
 
@@ -12,21 +12,11 @@ export default function BoardWrite(){
   const [content, setContent] = useState("");
   const [userId, setUserId] = useState(null);
 
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return;
-
-        console.log("🔑 accessToken:", token);
-
-        axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-            .then(res => {
-                console.log("👤 로그인 유저:", res.data);
-                setUserId(res.data.email);
-            })
-            .catch(err => console.error("유저 정보 조회 실패:", err));
-    }, []);
+  useEffect(() => {
+    fetchMyInfo()
+      .then((data) => setUserId(data.email))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit() {
     if(!title.trim()) return alert("제목을 입력해주세요.");

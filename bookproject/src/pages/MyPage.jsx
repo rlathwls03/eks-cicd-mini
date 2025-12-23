@@ -1,6 +1,7 @@
 import { Box, TextField, Button, Typography, Paper } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchMyInfo, updateMyInfo } from "../api/authApi";
 
 /**
  * 내 정보 조회 + 수정 페이지
@@ -27,103 +28,46 @@ export default function MyPage() {
 
     // 내 정보 불러오기
     useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-            alert("로그인이 필요합니다.");
-            nav("/login");
-            return;
-        }
-
-        const fetchMe = async () => {
-            try {
-                const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!res.ok) {
-                    const data = await res.json().catch(() => null);
-                    alert(data?.message || "내 정보를 불러오지 못했습니다.");
-                    if (res.status === 401) {
-                        nav("/login");
-                    }
-                    return;
-                }
-
-                const data = await res.json();
-
-                setForm((prev) => ({
-                    ...prev,
-                    email: data.email || "",
-                    nickname: data.nickname || "",
-                }));
-            } catch (err) {
-                console.error(err);
-                alert("서버와 통신에 실패했습니다.");
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMe();
-    }, [nav]);
+      fetchMyInfo()
+        .then(data => {
+          setForm(prev => ({
+            ...prev,
+            email: data.email,
+            nickname: data.nickname,
+          }));
+        })
+        .catch(() => {
+          alert("로그인이 필요합니다.");
+          nav("/login");
+        })
+        .finally(() => setLoading(false));
+    }, []);
 
     // 정보 수정 요청
     const handleUpdate = async () => {
-        const token = localStorage.getItem("accessToken");
-        if (!token) {
-            alert("로그인이 필요합니다.");
-            nav("/login");
-            return;
+      try {
+        const data = await updateMyInfo({
+          nickname: form.nickname,
+          currentPassword: form.currentPassword || null,
+          newPassword: form.newPassword || null,
+        });
+
+        alert("회원 정보가 수정되었습니다.");
+
+        if (data?.nickname) {
+          localStorage.setItem("nickname", data.nickname);
         }
 
-        if (!form.nickname) {
-            alert("닉네임을 입력해주세요.");
-            return;
-        }
-
-        try {
-            const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    nickname: form.nickname,
-                    currentPassword: form.currentPassword || null,
-                    newPassword: form.newPassword || null,
-                }),
-            });
-
-            const data = await res.json().catch(() => null);
-
-            if (!res.ok) {
-                alert(data?.message || "회원 정보 수정에 실패했습니다.");
-                return;
-            }
-
-            alert("회원 정보가 수정되었습니다.");
-
-            // 닉네임 변경 시 로컬스토리지 갱신 → 헤더에 반영
-            if (data?.nickname) {
-                localStorage.setItem("nickname", data.nickname);
-            }
-
-            // 비밀번호 입력칸 초기화
-            setForm((prev) => ({
-                ...prev,
-                currentPassword: "",
-                newPassword: "",
-            }));
-        } catch (err) {
-            console.error(err);
-            alert("서버와 통신에 실패했습니다.");
-        }
+        setForm(prev => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+        }));
+      } catch (err) {
+        alert(err.response?.data?.message || "수정 실패");
+      }
     };
+
 
     if (loading) {
         return (

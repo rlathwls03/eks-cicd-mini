@@ -15,20 +15,6 @@ export default function BookDetail() {
     const [book, setBook] = useState(null);
     const [isOwner, setIsOwner] = useState(false);
 
-    // 📌 임시 도서데이터 (백엔드 연결 전까지)
-//     const book = {
-//         id,
-//         title:"책 먹는 여우",
-//         author:"프란치스카 비어만",
-//         category:"유아도서",
-//         content:"...",
-//         img:"https://image.aladin.co.kr/product/8/47/cover/s9788937864472.jpg",
-//         likes:4,
-//         writer:"에이블스쿨08",
-//         updated:"2025-12-04 16:11",
-//     };
-
-
     useEffect(() => {
             const loadBook = async () => {
                 try {

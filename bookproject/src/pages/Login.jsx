@@ -3,6 +3,7 @@
 import { Box, TextField, Button, Typography, Paper } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginApi } from "../api/authApi";
 
 export default function Login() {
     const nav = useNavigate();
@@ -12,62 +13,49 @@ export default function Login() {
         pw: "",
     });
 
+    // 로딩 상태 추가
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
     const login = async () => {
-        if (!form.email || !form.pw) {
-            alert("이메일과 비밀번호를 입력해주세요.");
-            return;
+      // 간단한 입력 검증
+      const email = form.email?.trim();
+      const password = form.pw ?? "";
+
+      if (!email || !password) {
+        alert("이메일과 비밀번호를 입력하세요");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        console.debug("login request payload:", { email, password });
+        const data = await loginApi(email, password);
+
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("nickname", data.nickname ?? "");
+
+        nav("/main");
+      } catch (err) {
+        // 서버 에러 상세를 콘솔에 찍고 사용자에게 가능한 한 구체적인 메시지를 보여줌
+        console.error("로그인 중 에러 발생:", err);
+
+        const status = err?.response?.status;
+        // 서버가 { message: '...' } 형태로 에러를 보낼 수 있으므로 우선적으로 사용
+        const serverMessage = err?.response?.data?.message ?? err?.response?.data ?? err?.message;
+
+        if (status) {
+          alert(`로그인 실패 (${status}): ${serverMessage}`);
+        } else {
+          alert(`로그인 실패: ${serverMessage}`);
         }
-
-        try {
-            const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: form.email,
-                    password: form.pw,
-                }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => null);
-                alert(data?.message || "로그인에 실패했습니다.");
-                return;               // ❗ 실패면 여기서 끝, 페이지 안 넘어감
-            }
-
-            const data = await res.json();
-
-            // 토큰 내려오면 저장
-            if (data.accessToken) {
-                localStorage.setItem("accessToken", data.accessToken);
-            }
-            if (data.refreshToken) {
-                localStorage.setItem("refreshToken", data.refreshToken);
-            }
-
-            if (data.nickname) {
-                localStorage.setItem("nickname", data.nickname); // ✅ 추가
-            }
-
-            localStorage.setItem(
-                "loginUser",
-                JSON.stringify({
-                    email: form.email,
-                    nickname: data.nickname || "",
-                })
-            );
-
-            alert("로그인 성공!");
-            nav("/main");           // 메인 페이지로 이동
-        } catch (err) {
-            console.error(err);
-            alert("서버와 통신에 실패했습니다.");
-        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     return (
@@ -123,8 +111,9 @@ export default function Login() {
                     variant="contained"
                     sx={{ py: 1.5, fontSize: 18, bgcolor: "#00b6b8" }}
                     onClick={login}
+                    disabled={loading}
                 >
-                    로그인
+                    {loading ? "로딩..." : "로그인"}
                 </Button>
 
                 <Button

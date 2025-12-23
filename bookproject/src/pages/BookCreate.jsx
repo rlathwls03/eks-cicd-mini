@@ -4,40 +4,24 @@ import { useState, useEffect } from "react";
 import { Box, TextField, Button, MenuItem, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { createBook } from "../api/bookApi"; // 경로는 프로젝트 구조에 맞게 수정
-import axios from "axios";
+import { fetchMyInfo } from "../api/authApi";
 
 export default function BookCreate() {
 
     const nav = useNavigate();
     const [userId, setUserId] = useState(null);
 
-    // 로그인한 사용자 정보 가져오기
-//       useEffect(() => {
-//         const token = localStorage.getItem("accessToken");
-//         console.log("🔑 accessToken:", token);
-//         if (!token) return;
-//
-//         axios.get("http://localhost:8080/auth/me", {
-//           headers: { Authorization: `Bearer ${token}` },
-//         })
-//         .then(res => setUserId(res.data.id))   // 백엔드 UserResponse에 id 포함되어 있어야 함
-//         .catch(err => console.error("유저 정보 조회 실패:", err));
-//       }, []);
-
     useEffect(() => {
-      const token = localStorage.getItem("accessToken");
-      if (!token) return;
-
-      console.log("🔑 accessToken:", token);
-
-      axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      .then(res => {
-        console.log("👤 로그인 유저:", res.data);
-        setUserId(res.data.id);
-      })
-      .catch(err => console.error("유저 정보 조회 실패:", err));
+      fetchMyInfo()
+        .then(data => {
+          console.log("👤 로그인 유저:", data);
+          setUserId(data.id);
+        })
+        .catch(err => {
+          console.error("유저 정보 조회 실패:", err);
+          alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+          nav('/login');
+        });
     }, []);
 
     const [form, setForm] = useState({
@@ -70,6 +54,12 @@ export default function BookCreate() {
     async function handleSubmit() {
         if (!form.title || !form.content || !form.category) {
             alert("필수 항목을 모두 입력하세요.");
+            return;
+        }
+
+        if (!userId) {
+            alert("로그인 정보가 없습니다. 로그인 후 등록하세요.");
+            nav('/login');
             return;
         }
 

@@ -3,6 +3,7 @@
 import { Box, TextField, Button, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { signupApi } from "../api/authApi";
 
 export default function Register() {
     const nav = useNavigate();
@@ -18,42 +19,36 @@ export default function Register() {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
-    // 백엔드 /auth/signup 호출
     const register = async () => {
-        if (!form.email || !form.pw || !form.pwCheck || !form.nickname) {
-            alert("모든 항목을 입력해주세요!");
-            return;
-        }
-        if (form.pw !== form.pwCheck) {
-            alert("비밀번호가 일치하지 않습니다!");
-            return;
-        }
+      // 입력 검증: trim 및 비밀번호 확인
+      const email = form.email?.trim();
+      const nickname = form.nickname?.trim();
+      const password = form.pw ?? "";
 
-        try {
-            const res = await fetch("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/signup", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: form.email,
-                    password: form.pw,      // 🔹 백엔드 DTO 필드명에 맞춤
-                    nickname: form.nickname
-                }),
-            });
+      if (!email || !password || !form.pwCheck) {
+        alert("이메일과 비밀번호를 모두 입력하세요");
+        return;
+      }
 
-            if (!res.ok) {
-                const data = await res.json().catch(() => null);
-                alert(data?.message || "회원가입에 실패했습니다.");
-                return;
-            }
+      if (password !== form.pwCheck) {
+        alert("비밀번호 확인이 일치하지 않습니다.");
+        return;
+      }
 
-            alert("회원가입이 완료되었습니다!");
-            nav("/login");
-        } catch (err) {
-            console.error(err);
-            alert("서버 연결에 실패했습니다.");
-        }
+      try {
+        const res = await signupApi({
+          email,
+          password,
+          nickname,
+        });
+
+        console.log("signup response:", res);
+        alert("회원가입이 완료되었습니다!");
+        nav("/login");
+      } catch (err) {
+        console.error("signup error:", err);
+        alert(err.response?.data?.message || "회원가입 실패");
+      }
     };
 
     return (

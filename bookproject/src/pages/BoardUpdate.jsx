@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchBoardDetail, updateBoard } from "../api/boardApi";
-import axios from "axios";
+import { fetchMyInfo } from "../api/authApi";
  
 export default function BoardUpdate() {
   const { id } = useParams();     // /board/update/:id
@@ -16,14 +16,9 @@ export default function BoardUpdate() {
   // 🔐 로그인 유저 정보 불러오기
   // ===========================
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (!token) return;
- 
-    axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    .then(res => setLoginUser(res.data.email))
-    .catch(err => console.error("로그인 사용자 조회 실패:", err));
+    fetchMyInfo()
+      .then((data) => setLoginUser(data.email))
+      .catch(() => {});
   }, []);
  
   // ===========================

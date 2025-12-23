@@ -151,7 +151,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOriginPatterns(List.of("*"));
+        //config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:5173",
+                "http://k8s-default-aibookma-d8533ce163-1165704180.us-east-2.elb.amazonaws.com"
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of(
                 "Authorization",
@@ -166,6 +170,7 @@ public class SecurityConfig {
 
         return source;
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

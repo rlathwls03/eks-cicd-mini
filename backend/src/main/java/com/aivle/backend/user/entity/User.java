@@ -34,7 +34,7 @@ public class User {
     private Role role;
 
     // 현재 발급된 refresh token (로그아웃 시 null)
-    @Column
+    @Column(length = 2000)
     private String refreshToken;
 
     public enum Role {

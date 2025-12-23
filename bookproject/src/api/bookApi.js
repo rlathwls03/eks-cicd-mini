@@ -1,29 +1,8 @@
 // 2025-12-05 16:34 형택님 마지막 수정으로 복구
 
-import axios from "axios";
+import instance from "./axiosInstance";
 
-//const instance = axios.create({
-//    baseURL: "http://localhost:8080", // 백엔드 주소
-//});
-
-const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-});
-
-
-//  모든 요청에 Authorization 헤더 자동 추가
-instance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-export default instance;
+// 이제 공유된 instance를 사용합니다 (baseURL + Authorization 인터셉터 포함)
 
 // 도서 등록
 export const createBook = async (userId, data) => {

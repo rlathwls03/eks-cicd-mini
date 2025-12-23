@@ -10,7 +10,8 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { fetchBoardDetail, deleteBoard } from "../api/boardApi";
 import { fetchReplies, addReply, deleteReply } from "../api/replyApi";
-import axios from "axios";
+import { fetchMyInfo } from "../api/authApi";
+import { toggleBoardLike } from "../api/boardApi";
 
 export default function BoardDetail() {
   const nav = useNavigate();
@@ -32,17 +33,16 @@ export default function BoardDetail() {
     const token = localStorage.getItem("accessToken");
     if (!token) return;
 
-    axios.get("http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/auth/me", {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => {
+    fetchMyInfo()
+      .then((data) => {
         setLoginUser({
-          id: res.data.id,
-          email: res.data.email
+          id: data.id,
+          email: data.email,
         });
       })
       .catch(() => setLoginUser(null));
   }, []);
+
 
     const didFetch = useRef(false);
     useEffect(() => {
@@ -113,25 +113,10 @@ export default function BoardDetail() {
     // 좋아요/싫어요 API 호출 함수
     const toggleLike = async (boardId, liked) => {
       try {
-        const token = localStorage.getItem("accessToken");
-        if (!token) return alert("로그인 후 이용 가능합니다.");
-
-//         const res = await axios.post(
-//           `http://localhost:8080/api/boards/${boardId}/like?liked=${liked}`,
-//           {},
-//           { params: { liked }, headers: { Authorization: `Bearer ${token}` } }
-//         );
-        const res = await axios.post(
-          `http://k8s-default-backends-a3b6ec3a83-a409b26e2431b40c.elb.us-east-2.amazonaws.com/api/boards/${boardId}/like?liked=${liked}`,
-          {},
-          { params: { liked }, headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        // 백엔드에서 업데이트된 게시글 데이터 반환 시
-        setPost(res.data);
+        const data = await toggleBoardLike(boardId, liked);
+        setPost(data);
       } catch (err) {
-        console.error("좋아요/싫어요 요청 실패:", err);
-        alert("좋아요 처리 중 오류가 발생했습니다.");
+        alert("좋아요 처리 중 오류 발생");
       }
     };
 

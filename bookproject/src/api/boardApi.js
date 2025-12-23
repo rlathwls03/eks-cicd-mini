@@ -70,3 +70,10 @@ export const deleteBoard = async (boardId) => {
     const response = await instance.delete(`/api/boards/${boardId}`);
     return response.data;
 };
+
+export const toggleBoardLike = async (boardId, liked) => {
+  const res = await instance.post(
+    `/api/boards/${boardId}/like?liked=${liked}`
+  );
+  return res.data;
+};
