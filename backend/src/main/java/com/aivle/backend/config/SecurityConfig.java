@@ -125,6 +125,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/hello",
+                                "/api/hello",
                                 "/health",
                                 "/auth/signup",
                                 "/auth/login",
